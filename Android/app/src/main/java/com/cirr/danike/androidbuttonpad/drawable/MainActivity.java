@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 
 import com.cirr.danike.androidbuttonpad.R;
+import com.cirr.danike.androidbuttonpad.utilities.drawables.GridLayoutManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,6 +19,9 @@ public class MainActivity extends AppCompatActivity {
         // get ahold of the instance of your layout
         GridLayout grid = (GridLayout) findViewById(R.id.main_btnGrid);
 
+        GridLayoutManager manager = new GridLayoutManager(grid, getLayoutInflater(), R.layout.layout_button);
+
+        /*
         grid.setColumnCount(6);
         grid.setRowCount(5);
 
@@ -53,6 +57,6 @@ public class MainActivity extends AppCompatActivity {
         btn2.setLayoutParams(lparams2);
 
         // add the inflated View to the layout
-        grid.addView(btn2);
+        grid.addView(btn2);*/
     }
 }
