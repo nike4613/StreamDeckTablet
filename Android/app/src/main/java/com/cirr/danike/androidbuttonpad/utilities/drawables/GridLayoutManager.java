@@ -85,6 +85,8 @@ public class GridLayoutManager {
     }
 
     void set(int x, int y, ViewReference ref) {
+        if (gridViewRefs.get(x).size() <= y)
+            gridViewRefs.get(x).add(ref);
         gridViewRefs.get(x).set(y, ref);
     }
 
@@ -92,9 +94,13 @@ public class GridLayoutManager {
         // initialize lists
         gridViewRefs = new ArrayList<>(width);
         for (int i = 0; i < width; i++ ) {
-            gridViewRefs.set(i, new ArrayList<>(height));
+            if (gridViewRefs.size() <= i)
+                gridViewRefs.add(new ArrayList<>(height));
+            else
+                gridViewRefs.set(i, new ArrayList<>(height));
 
             for (int j = 0; j < height; j++) {
+
                 // insert view and create viewreference for it
                 ViewReference vr = new ViewReference(this);
                 vr._width = 1;
