@@ -20,7 +20,25 @@ public class MainActivity extends AppCompatActivity {
         GridLayout grid = (GridLayout) findViewById(R.id.main_btnGrid);
 
         GridLayoutManager manager = new GridLayoutManager(grid, getLayoutInflater(), R.layout.layout_button);
+        manager.init();
 
+        manager.get(0,0).setWidth(3);
+        manager.get(0,0).setHeight(2);
+
+        manager.get(0,2).setWidth(2);
+        manager.get(0,2).setHeight(2);
+
+        manager.get(2,2).setWidth(2);
+        manager.get(2,2).setHeight(2);
+
+        manager.get(3,0).setWidth(1);
+        manager.get(3,0).setHeight(2);
+
+        manager.get(4,0).setWidth(2);
+        manager.get(4,0).setHeight(1);
+
+        manager.get(4,2).setWidth(2);
+        manager.get(4,2).setHeight(2);
         /*
         grid.setColumnCount(6);
         grid.setRowCount(5);

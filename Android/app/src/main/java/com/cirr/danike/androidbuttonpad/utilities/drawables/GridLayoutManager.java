@@ -2,6 +2,7 @@ package com.cirr.danike.androidbuttonpad.utilities.drawables;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.widget.GridLayout;
 
@@ -42,6 +43,73 @@ public class GridLayoutManager {
         public int height() {
             return _height;
         }
+
+        public void setWidth(int width) {
+            manager.setWidth(_x, _y, width);
+        }
+        public void setHeight(int height) {
+            manager.setHeight(_x, _y, height);
+        }
+    }
+
+    void setWidth(int x, int y, int width) {
+        if (x+width > this.width)
+            throw new IndexOutOfBoundsException("New width puts button off screen");
+
+        ViewReference ref = get(x, y);
+        int old_width = ref._width;
+        ref._width = width;
+        View view = ref.view();
+        // update columnSpec
+        ((GridLayout.LayoutParams)view.getLayoutParams()).columnSpec = GridLayout.spec(x, width, width);
+
+        for (int i = x+1; i < x+width; i++) {
+            for (int j = y; j < y+ref._height; j++) {
+                ViewReference vr = get(i, j);
+
+                View vw = vr.view();
+                ((ViewGroup) vw.getParent()).removeView(vw);
+
+                set(i, j, ref);
+            }
+        }
+
+        for (int i = x+width; i < x+old_width; i++) {
+            for (int j = y; j < y+ref._height; j++) {
+                ViewReference vr = createView(i, j, 1, 1);
+                set(i, j, vr);
+            }
+        }
+    }
+
+    void setHeight(int x, int y, int height) {
+        if (y+height > this.height)
+            throw new IndexOutOfBoundsException("New height puts button off screen");
+
+        ViewReference ref = get(x, y);
+        int old_height = ref._height;
+        ref._height = height;
+        View view = ref.view();
+        // update rowSpec
+        ((GridLayout.LayoutParams)view.getLayoutParams()).rowSpec = GridLayout.spec(y, height, height);
+
+        for (int i = y+1; i < y+height; i++) {
+            for (int j = x; j < x+ref._width; j++) {
+                ViewReference vr = get(j, i);
+
+                View vw = vr.view();
+                ((ViewGroup) vw.getParent()).removeView(vw);
+
+                set(j, i, ref);
+            }
+        }
+
+        for (int i = y+height; i < y+old_height; i++) {
+            for (int j = x; j < x+ref._width; j++) {
+                ViewReference vr = createView(j, i, 1, 1);
+                set(j, i, vr);
+            }
+        }
     }
 
     private List<List<ViewReference>> gridViewRefs;
@@ -55,8 +123,10 @@ public class GridLayoutManager {
         layout = grid;
         inflator = inflater;
         this.cellContentId = cellContentId;
+    }
 
-        setSize(1,1);
+    public void init() {
+        setSize(6,4);
     }
 
     private int width = -1;
@@ -85,9 +155,10 @@ public class GridLayoutManager {
     }
 
     void set(int x, int y, ViewReference ref) {
-        if (gridViewRefs.get(x).size() <= y)
+        if (gridViewRefs.get(x).size() == y)
             gridViewRefs.get(x).add(ref);
-        gridViewRefs.get(x).set(y, ref);
+        else
+            gridViewRefs.get(x).set(y, ref);
     }
 
     private void createViews() {
@@ -100,30 +171,35 @@ public class GridLayoutManager {
                 gridViewRefs.set(i, new ArrayList<>(height));
 
             for (int j = 0; j < height; j++) {
-
-                // insert view and create viewreference for it
-                ViewReference vr = new ViewReference(this);
-                vr._width = 1;
-                vr._height = 1;
-                vr._x = i;
-                vr._y = j;
-
-                View view = inflator.inflate(cellContentId, layout, false);
-
-                vr._view = view;
-
-                // set view layoutparams: row, column (y,x) as opposed to column, row (x,y)
-                GridLayout.LayoutParams lparams = new GridLayout.LayoutParams(
-                        GridLayout.spec(j,1, 1),
-                        GridLayout.spec(i,1, 1)
-                );
-                view.setLayoutParams(lparams);
-
-                // add the inflated View to the layout
-                layout.addView(view);
+                ViewReference vr = createView(i, j, 1, 1);
 
                 this.set(i,j,vr);
             }
         }
+    }
+
+    private ViewReference createView(int x, int y, int width, int height) {
+        // insert view and create viewreference for it
+        ViewReference vr = new ViewReference(this);
+        vr._width = width;
+        vr._height = height;
+        vr._x = x;
+        vr._y = y;
+
+        View view = inflator.inflate(cellContentId, layout, false);
+
+        vr._view = view;
+
+        // set view layoutparams: row, column (y,x) as opposed to column, row (x,y)
+        GridLayout.LayoutParams lparams = new GridLayout.LayoutParams(
+                GridLayout.spec(y,height, height),
+                GridLayout.spec(x,width, width)
+        );
+        view.setLayoutParams(lparams);
+
+        // add the inflated View to the layout
+        layout.addView(view);
+
+        return vr;
     }
 }
