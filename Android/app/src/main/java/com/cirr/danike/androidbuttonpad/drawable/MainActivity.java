@@ -7,7 +7,12 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 
 import com.cirr.danike.androidbuttonpad.R;
+import com.cirr.danike.androidbuttonpad.networking.NetDataBlock;
 import com.cirr.danike.androidbuttonpad.utilities.drawables.GridLayoutManager;
+
+import org.json.JSONException;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,42 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
         manager.get(4,2).setWidth(2);
         manager.get(4,2).setHeight(2);
-        /*
-        grid.setColumnCount(6);
-        grid.setRowCount(5);
 
-        // assuming your Wizard content is in content_wizard.xml
-        View btn = getLayoutInflater()
-                .inflate(R.layout.layout_button, grid, false);
-
-        GridLayout.LayoutParams lparams = new GridLayout.LayoutParams(
-                GridLayout.spec(0,1, 1),
-                GridLayout.spec(0,1, 1)
-        );
-
-        //lparams.height = ViewGroup.LayoutParams.FILL_PARENT;
-        //lparams.width = GridLayout.LayoutParams.MATCH_PARENT;
-
-        btn.setLayoutParams(lparams);
-
-        // add the inflated View to the layout
-        grid.addView(btn);
-
-        // assuming your Wizard content is in content_wizard.xml
-        View btn2 = getLayoutInflater()
-                .inflate(R.layout.layout_button, grid, false);
-
-        GridLayout.LayoutParams lparams2 = new GridLayout.LayoutParams(
-                GridLayout.spec(0,1, 1),
-                GridLayout.spec(1,1, 1)
-        );
-
-        //lparams2.height = GridLayout.LayoutParams.MATCH_PARENT;
-        //lparams2.width = GridLayout.LayoutParams.MATCH_PARENT;
-
-        btn2.setLayoutParams(lparams2);
-
-        // add the inflated View to the layout
-        grid.addView(btn2);*/
+        List<NetDataBlock.NetDataBlockDef> defs;
+        try {
+            defs = NetDataBlock.fromJsonDefs("{\"ButtonUpdate\":{\"guid\":\"52c6dfc9-2973-43a6-bc92-635dd6118774\",\"fields\":[\"x_pos\",\"y_pos\"]},\"ButtonSizeUpdate\":{\"guid\":\"d4397081-800c-41e4-9637-5a69f46270ef\",\"fields\":[\"x_pos\",\"y_pos\",\"new_width\",\"new_height\"]}}");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
