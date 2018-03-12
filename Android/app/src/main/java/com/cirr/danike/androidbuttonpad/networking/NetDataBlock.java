@@ -1,5 +1,7 @@
 package com.cirr.danike.androidbuttonpad.networking;
 
+import android.util.Log;
+
 import com.cirr.danike.androidbuttonpad.networking.annotations.NetworkDataBlock;
 
 import org.json.JSONArray;
@@ -16,17 +18,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.zip.CRC32;
 
 /**
  * Created by aaron on 2018-03-10.
  */
 
 public class NetDataBlock {
+    private static String TAG = "NetDataBlock";
+
     protected static byte[] blockHeader = "NET-dObj".getBytes(StandardCharsets.UTF_8);
-    private static Map<Class<? extends NetDataBlock>, UUID> uuidLookup = new HashMap<>();
+    private static Map<Class<? extends NetDataBlock>, NetDataBlockDef> blockDefLookup = new HashMap<>();
+    private static Map<UUID, NetDataBlockDef> blockDefLookupUuid = new HashMap<>();
     private static Map<String, NetDataBlockDef> defLookup = new HashMap<>();
 
     public static class NetDataBlockDef {
@@ -73,6 +76,27 @@ public class NetDataBlock {
         return fromJsonDefs(new JSONObject(json));
     }
 
+    public static void registerJsonDefs(JSONObject obj) throws JSONException {
+        List<NetDataBlockDef> defs = fromJsonDefs(obj);
+
+        for (NetDataBlockDef def : defs) {
+            NetDataBlockDef assoc = defLookup.get(def.name);
+            if (assoc == null) {
+                Log.w(TAG, "No tag with name " + def.name);
+                continue;
+            }
+
+            assoc.fields.retainAll(def.fields); // limit to a sane value
+            assoc.guid = def.guid;
+            blockDefLookup.put(assoc.clazz, assoc);
+            blockDefLookupUuid.put(assoc.guid, assoc);
+        }
+    }
+
+    public static void registerJsonDefs(String json) throws JSONException {
+        registerJsonDefs(new JSONObject(json));
+    }
+
     private static Map<String, PropertyCallbacks<? extends NetDataBlock>> GetPropertiesFor(Class<? extends NetDataBlock> cls) throws Throwable {
         try {
             Method m = cls.getDeclaredMethod("GetProperties");
@@ -117,14 +141,26 @@ public class NetDataBlock {
         defLookup.put(def.name, def);
     }
 
-    public static abstract class PropertyCallbacks<T extends NetDataBlock> {
-        public abstract byte[] serialize(T self);
-        public abstract void deserialize(T self, byte[] data);
+    public interface PropertyCallbacks<T extends NetDataBlock> {
+        byte[] serialize(T self);
+         void deserialize(T self, byte[] data);
     }
 
     private UUID TypeUUID;
     private Map<Long, PropertyCallbacks<?>> crcSerializer = new HashMap<>();
 
+    public NetDataBlock() throws Throwable {
+        UUID uuid = blockDefLookupUuid.get(getClass()).guid;
+        if (uuid == null)
+            throw new IllegalStateException("No GUID found for class being constructed");
 
+        Map<String, PropertyCallbacks<? extends NetDataBlock>> fields = GetPropertiesFor(getClass());
+
+        for (String k : fields.keySet()) {
+            CRC32 crc = new CRC32();
+            crc.update(k.getBytes(StandardCharsets.UTF_8));
+            crcSerializer.put(crc.getValue(), fields.get(k));
+        }
+    }
 
 }

@@ -8,6 +8,7 @@ import android.widget.GridLayout;
 
 import com.cirr.danike.androidbuttonpad.R;
 import com.cirr.danike.androidbuttonpad.networking.NetDataBlock;
+import com.cirr.danike.androidbuttonpad.networking.NetDataBlockSerializationTest;
 import com.cirr.danike.androidbuttonpad.utilities.drawables.GridLayoutManager;
 
 import org.json.JSONException;
@@ -45,9 +46,14 @@ public class MainActivity extends AppCompatActivity {
         manager.get(4,2).setWidth(2);
         manager.get(4,2).setHeight(2);
 
-        List<NetDataBlock.NetDataBlockDef> defs;
         try {
-            defs = NetDataBlock.fromJsonDefs("{\"ButtonUpdate\":{\"guid\":\"52c6dfc9-2973-43a6-bc92-635dd6118774\",\"fields\":[\"x_pos\",\"y_pos\"]},\"ButtonSizeUpdate\":{\"guid\":\"d4397081-800c-41e4-9637-5a69f46270ef\",\"fields\":[\"x_pos\",\"y_pos\",\"new_width\",\"new_height\"]}}");
+            NetDataBlock.RegisterBlockType(NetDataBlockSerializationTest.class);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        try {
+            NetDataBlock.registerJsonDefs("{\"SerializationTest\":{\"guid\":\"0d7ff61e-d29d-49d0-a17d-607cf2e3fce2\",\"fields\":[\"str\",\"int\"]},\"ButtonUpdate\":{\"guid\":\"742eeb7b-9bc3-49ee-a2a2-dad7667280ef\",\"fields\":[\"x_pos\",\"y_pos\"]},\"ButtonSizeUpdate\":{\"guid\":\"7a7ec63e-a481-437b-902e-b91aec984058\",\"fields\":[\"x_pos\",\"y_pos\",\"new_width\",\"new_height\"]}}");
         } catch (JSONException e) {
             e.printStackTrace();
         }
